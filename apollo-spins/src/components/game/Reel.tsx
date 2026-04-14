@@ -36,60 +36,58 @@ export default function Reel({
     onSpinComplete,
 }:ReelProps) 
 {
-    const[visibleSymbols, setVisibleSymbols] =
-    useState <[SymbolId, SymbolId, SymbolId]>
-    (getInitialSymbols());
+  const [visibleSymbols, setVisibleSymbols] =
+    useState<[SymbolId, SymbolId, SymbolId]>(getInitialSymbols());
 
-    const tickRef = useRef<ReturnType<typeof setInterval> | null> (null);
-    const spinTimerRef = useRef<ReturnType<typeof setInterval> | null> (null);
-    const onSpinCompleteRef = useRef(onSpinComplete) // -b- common React gotcha
+  const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const spinTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const onSpinCompleteRef = useRef(onSpinComplete); // -b- common React gotcha
 
-    useEffect(() => {
-        onSpinCompleteRef.current = onSpinComplete;
-    }, [onSpinComplete]);
+  useEffect(() => {
+    onSpinCompleteRef.current = onSpinComplete;
+  }, [onSpinComplete]);
 
-    useEffect(() => {
-        if(isSpinning) {
-            tickRef.current = setInterval(() => {
-                setVisibleSymbols([
-                    getRandomSymbolId(),
-                    getRandomSymbolId(),
-                    getRandomSymbolId(),
-                ]);
-            }, TICK_INVERVAL);
+  useEffect(() => {
+    if (isSpinning) {
+      tickRef.current = setInterval(() => {
+        setVisibleSymbols([
+          getRandomSymbolId(),
+          getRandomSymbolId(),
+          getRandomSymbolId(),
+        ]);
+      }, TICK_INVERVAL);
 
-            spinTimerRef.current = setTimeout(()=> { // -b- clear
-                clearInterval(tickRef.current!);
+      spinTimerRef.current = setTimeout(() => {
+        // -b- clear
+        clearInterval(tickRef.current!);
 
-                if(result){
-                    setVisibleSymbols(result);
-                }
-
-                onSpinCompleteRef.current();
-            }, SPIN_DURATION);
+        if (result) {
+          setVisibleSymbols(result);
         }
 
-        return () => {
-            clearInterval(tickRef.current!);
-            clearTimeout(spinTimerRef.current!);
-        };
-    }, [isSpinning, result])
+        onSpinCompleteRef.current();
+      }, SPIN_DURATION);
+    }
 
-    const slotWidth = symbolSize + gap;
+    return () => {
+      clearInterval(tickRef.current!);
+      clearTimeout(spinTimerRef.current!);
+    };
+  }, [isSpinning, result]);
 
-    return(
-        <Container x={x} y={y}>
-            {visibleSymbols.map((symbolId, index) => (
-                <Symbol
-                    key={index}
-                    symbolId={symbolId}
-                    x={index*slotWidth}
-                    y={0}
-                    size={symbolSize}
-                />
-            ))}
-        </Container>
-    )
+  const slotWidth = symbolSize + gap;
 
+  return (
+    <Container x={x} y={y}>
+      {visibleSymbols.map((symbolId, index) => (
+        <Symbol
+          key={index}
+          symbolId={symbolId}
+          x={index * slotWidth}
+          y={0}
+          size={symbolSize}
+        />
+      ))}
+    </Container>
+  );
 }
-

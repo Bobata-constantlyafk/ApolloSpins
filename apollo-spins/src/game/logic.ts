@@ -22,15 +22,20 @@ export function checkWin(result:SpinResult, bet:number):WinResult
 {
     const [a,b,c] = result;
 
-    if (a==b && b==c)
-    {
-        const payout = bet * 3;
-        return{multiplier:3, payout, message:`Jackpot! Payout: $${'payout'} 💰`}
-    }
-    else if(a==b || b==c || c==a)
-    {
-        const payout = bet * 2;
-        return{multiplier:2, payout, message:`Lucky! Payout: $${'payout'} 💶`}
+    if (a == b && b == c) {
+      const payout = bet * 3;
+      return {
+        multiplier: 3,
+        payout,
+        message: `Jackpot! Payout: €${payout} 💰`,
+      };
+    } else if (a == b || b == c || c == a) {
+      const payout = bet * 2;
+      return {
+        multiplier: 2,
+        payout,
+        message: `Lucky! Payout: € ${payout} 💶`,
+      };
     }
 
     return{multiplier:0, payout:0, message:`Try again 😭😭`}
