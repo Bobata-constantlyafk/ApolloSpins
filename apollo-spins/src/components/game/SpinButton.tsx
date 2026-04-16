@@ -1,61 +1,69 @@
-import {Container, Graphics, Text} from "@pixi/react";
-import {useCallback} from "react";
-import type {Graphics as PixiGraphics} from "pixi.js";
-import {TextStyle} from "pixi.js";
+import { Container, Text, Sprite } from "@pixi/react";
+import { TextStyle, Texture } from "pixi.js";
+import { useMemo } from "react";
+import btnSpin from "../../../public/assets/btnPurple.png";
 
 interface SpinButtonProps {
-    x:number;
-    y:number;
-    onSpin: () => void;
-    disabled: boolean;
+  x: number;
+  y: number;
+  onSpin: () => void;
+  disabled: boolean;
+  spinCost: number;
+  isSpinning: boolean;
+  canAfford: boolean;
 }
 
-const BUTTON_WIDTH      = 160;
-const BUTTON_HEIGHT     = 60;
-const BUTTON_RADIUS     = 12;
+const texture = Texture.from(btnSpin);
 
 export default function SpinButton({
-    x,
-    y,
-    onSpin,
-    disabled,
+  x,
+  y,
+  onSpin,
+  disabled,
+  spinCost,
+  isSpinning,
+  canAfford,
 }: SpinButtonProps) {
-    const drawButton = useCallback(
-        (g: PixiGraphics) => {
-            g.clear();
-            g.beginFill(disabled ? 0x555555:0xe94560);
-            g.drawRoundedRect(
-                -BUTTON_WIDTH / 2,
-                -BUTTON_HEIGHT / 2,
-                BUTTON_WIDTH,
-                BUTTON_HEIGHT,
-                BUTTON_RADIUS,
-            );
-            g.endFill();
-        },
-        [disabled]
-    );
+  const label = !canAfford
+    ? "OUT OF FUNDS"
+    : isSpinning
+    ? "SPINNING..."
+    : `SPIN (€${spinCost})`;
 
-    return (
-        <Container
-            x = {x}
-            y = {y}
-            interactive={!disabled}
-            cursor = {disabled ? "not-allowed" : "pointer"}
-            onclick = {disabled ? undefined: onSpin}
-        >
-            <Graphics draw = {drawButton} />
-            <Text
-                text = {disabled && !onSpin? "OUT OF FUNDS" : "SPIN"}
-                anchor = {0.5}
-                x = {0}
-                y = {0}
-                style = {new TextStyle({
-                    fontSize: 22,
-                    fontWeight: "bold",
-                    fill: disabled ? 0xaaaaaa : 0xffffff
-                })}
-            />
-        </Container>
-    )
+  const textStyle = useMemo(
+    () =>
+      new TextStyle({
+        fontSize: 22,
+        fontFamily: "Quicksand",
+        fontWeight: "bold",
+        fill: disabled ? 0xaaaaaa : 0xffffff,
+      }),
+    [disabled]
+  );
+
+  return (
+    <Container
+      x={x}
+      y={y}
+      interactive={!disabled}
+      cursor={disabled ? "not-allowed" : "pointer"}
+      pointertap={disabled ? undefined : onSpin}
+    >
+      <Sprite
+        texture={texture}
+        anchor={0.5}
+        width={160}
+        height={60}
+        alpha={disabled ? 0.6 : 1}
+      />
+
+      <Text
+        text={label}
+        anchor={0.5}
+        x={0}
+        y={0}
+        style={textStyle}
+      />
+    </Container>
+  );
 }

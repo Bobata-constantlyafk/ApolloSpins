@@ -1,69 +1,71 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import {
-    generateSpinResult,
-    checkWin,
-    type SpinResult,
-    type WinResult,
-    SPIN_COST,
-    STARTING_BALANCE
+  generateSpinResult,
+  checkWin,
+  type SpinResult,
+  type WinResult,
+  SPIN_COST,
+  STARTING_BALANCE,
 } from "../game/logic";
 
-export interface GameState{
-    balance:number;
-    isSpinning: boolean;
-    result: SpinResult | null;
-    lastWin: WinResult | null;
-    canSpin:boolean;
+const SPIN_DURATION = 3000;
+
+export interface GameState {
+  balance: number;
+  spinCost: number;
+  isSpinning: boolean;
+  result: SpinResult | null;
+  lastWin: WinResult | null;
+  canSpin: boolean;
 }
 
 export interface GameActions {
-    spin: () => void;
-    onSpinComplete: () => void;
+  spin: () => void;
 }
 
 export function useGameState(): GameState & GameActions {
-    const [balance, setBalance]         = useState<number>(STARTING_BALANCE);
-    const [isSpinning, setIsSpinning]   = useState<boolean>(false);
-    const [result, setResult]           = useState<SpinResult | null>(null);
-    const [lastWin, setLastWin]         = useState<WinResult | null>(null);
+  const [balance, setBalance] = useState<number>(STARTING_BALANCE);
+  const spinCost = SPIN_COST;
 
-    const canSpin = balance >= SPIN_COST && !isSpinning;
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [result, setResult] = useState<SpinResult | null>(null);
+  const [lastWin, setLastWin] = useState<WinResult | null>(null);
 
-    const spin = useCallback (() => {
-        if(!canSpin) return;
+  const spinTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-        setBalance((prev)=> prev - SPIN_COST);
-        setIsSpinning(true);
-        setLastWin(null);
+  const canSpin = balance >= spinCost && !isSpinning;
 
-        const spinResult = generateSpinResult();
-        setResult(spinResult);
+  const spin = useCallback(() => {
+    if (!canSpin) return;
 
-        setTimeout(() => {
-            setIsSpinning(false);
-        }, 3000);
-    },[canSpin]);
+    const spinResult = generateSpinResult();
 
-    const onSpinComplete = useCallback(()=> { // -b- use cb
-        if(!result) return;
+    // Deduct cost immediately
+    setBalance((prev) => prev - spinCost);
+    setIsSpinning(true);
+    setLastWin(null);
+    setResult(spinResult);
 
-        const WinResult = checkWin(result, SPIN_COST);
+    // Resolve spin AFTER duration
+    spinTimeoutRef.current = setTimeout(() => {
+      const winResult = checkWin(spinResult, spinCost);
 
-        if(WinResult.multiplier > 0)
-        {
-            setBalance((prev)=> prev + WinResult.payout);
-        }
+      if (winResult.multiplier > 0) {
+        setBalance((prev) => prev + winResult.payout);
+      }
 
-        setLastWin(WinResult);
-    }, [result]);
+      setLastWin(winResult);
+      setIsSpinning(false);
+    }, SPIN_DURATION);
+  }, [canSpin, spinCost]);
 
-    return {
-        balance,
-        isSpinning,
-        result,
-        lastWin,
-        canSpin,
-        spin,
-        onSpinComplete,
-    };
+  return {
+    balance,
+    spinCost,
+    isSpinning,
+    result,
+    lastWin,
+    canSpin,
+    spin,
+  };
 }
