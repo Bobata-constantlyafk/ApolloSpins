@@ -13,7 +13,7 @@ export interface WinResult {
 
 export function generateSpinResult():SpinResult {
     const roll = () =>
-        SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)].id; // -b- math
+        SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)].id;
 
     return [roll(), roll(), roll()];
 }
