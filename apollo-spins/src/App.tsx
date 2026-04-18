@@ -1,26 +1,36 @@
-import { Stage, Container } from "@pixi/react";
+import { Stage, Container, Sprite } from "@pixi/react";
+import { Texture } from "pixi.js";
 import { useGameState } from "./hooks/useGameState";
 import { useWindowSize } from "./hooks/useWindowSize";
 import Reel from "./components/game/Reel";
 import SpinButton from "./components/game/SpinButton";
-import UI from "./components/game/UI";
-import StarField from "./components/game/background/StarField";
-import Sun from "./components/game/background/Sun";
-import WaterfallEmitter from "./components/game/background/WaterfallEmitter";
-import WaveEffect from "./components/game/background/WaveEffect";
+import { WinText, BalanceText } from "./components/game/UI";
+import ReelBorder from "./components/game/ReelBorder";
 
-const STAGE_WIDTH = 1280;
+const STAGE_WIDTH  = 1280;
 const STAGE_HEIGHT = 720;
 
-const SYMBOL_SIZE = 75;
-const GAP = 20;
-const REEL_WIDTH = SYMBOL_SIZE * 3 + GAP * 2;
+const PANEL_WIDTH  = STAGE_WIDTH * 0.6;
+const PANEL_LEFT   = (STAGE_WIDTH - PANEL_WIDTH) / 2;
 
-const WATERFALL_WIDTH = 80;
-const WATERFALL_HEIGHT = STAGE_HEIGHT - 60;
+const TOP_HEIGHT    = 210;
+const MIDDLE_HEIGHT = 330;
+const BOTTOM_HEIGHT = 170;
 
-const DESIGN_WIDTH = 1280;
-const DESIGN_HEIGHT = 720;
+const SYMBOL_SIZE    = 90;
+const SYMBOL_GAP     = 20;
+const PANEL_PADDING  = 120;
+const SYMBOL_SPACING = (PANEL_WIDTH - PANEL_PADDING * 2 - SYMBOL_SIZE) / 2;
+
+const REEL_X = PANEL_PADDING + SYMBOL_SIZE / 2;
+const REEL_Y = MIDDLE_HEIGHT / 2;
+
+const BOTTOM_CENTER_Y = BOTTOM_HEIGHT / 2;
+
+const LICH_SIZE = 240;
+const LICH_Y    = -12;
+
+const lichTexture = Texture.from("/assets/lich.png");
 
 export default function App() {
   const {
@@ -29,17 +39,25 @@ export default function App() {
     isSpinning,
     result,
     lastWin,
-    canSpin,
     spin,
+    stopSpin,
   } = useGameState();
 
   const { width, height } = useWindowSize();
 
-  const scale = Math.max(width / DESIGN_WIDTH, height / DESIGN_HEIGHT);
-  const offsetX = (width - DESIGN_WIDTH * scale) / 2;
-  const offsetY = (height - DESIGN_HEIGHT * scale) / 2;
+  const CONTENT_HEIGHT = TOP_HEIGHT + MIDDLE_HEIGHT + BOTTOM_HEIGHT;
+
+  const scale          = Math.max(width / STAGE_WIDTH, height / STAGE_HEIGHT);
+
+  const realWidth      =  width - STAGE_WIDTH * scale;
+  const offsetX        =  realWidth / 2;
+
+  const stageCenterY   = (height - STAGE_HEIGHT * scale) / 2;
+  const contentCenterY = (STAGE_HEIGHT - CONTENT_HEIGHT) / 2 * scale;
+  const offsetY        = stageCenterY + contentCenterY;
 
   const canAfford = balance >= spinCost;
+  const isWin     = lastWin ? lastWin.multiplier > 0 : false;
 
   return (
     <Stage
@@ -48,60 +66,48 @@ export default function App() {
       options={{ backgroundColor: 0x1a1a2e, resizeTo: window }}
     >
       <Container x={offsetX} y={offsetY} scale={scale}>
-        {/* Background */}
-        <StarField />
-        <Sun />
 
-        <WaterfallEmitter
-          x={0}
-          spawnY={0}
-          height={WATERFALL_HEIGHT}
-          emitterWidth={WATERFALL_WIDTH}
-          flipDrift={false}
+        <Container x={STAGE_WIDTH / 2} y={TOP_HEIGHT / 3}>
+          {lastWin && <WinText message={lastWin.message} isWin={isWin} />}
+        </Container>
+
+        <Container x={PANEL_LEFT} y={TOP_HEIGHT}>
+          <ReelBorder width={PANEL_WIDTH} height={MIDDLE_HEIGHT} />
+          <Reel
+            x={REEL_X}
+            y={REEL_Y}
+            symbolSize={SYMBOL_SIZE}
+            gap={SYMBOL_GAP}
+            symbolSpacing={SYMBOL_SPACING}
+            result={result}
+            isSpinning={isSpinning}
+          />
+        </Container>
+
+        <Container x={PANEL_LEFT} y={TOP_HEIGHT + MIDDLE_HEIGHT}>
+          <Container x={0} y={BOTTOM_CENTER_Y}>
+            <BalanceText balance={balance} />
+          </Container>
+          <SpinButton
+            x={PANEL_WIDTH / 2}
+            y={BOTTOM_CENTER_Y}
+            onPress={isSpinning ? stopSpin : spin}
+            disabled={!canAfford && !isSpinning}
+            spinCost={spinCost}
+            isSpinning={isSpinning}
+            canAfford={canAfford}
+          />
+        </Container>
+
+        <Sprite
+          texture={lichTexture}
+          anchor={0.5}
+          x={PANEL_LEFT + PANEL_WIDTH / 2}
+          y={TOP_HEIGHT + LICH_Y}
+          width={LICH_SIZE}
+          height={LICH_SIZE}
         />
 
-        <WaterfallEmitter
-          x={STAGE_WIDTH - WATERFALL_WIDTH}
-          spawnY={0}
-          height={WATERFALL_HEIGHT}
-          emitterWidth={WATERFALL_WIDTH}
-          flipDrift={true}
-        />
-
-        <WaveEffect
-          stageWidth={STAGE_WIDTH}
-          y={STAGE_HEIGHT - 80}
-          waveBodyHeight={80}
-        />
-
-        {/* UI */}
-        <UI
-          x={DESIGN_WIDTH / 2}
-          y={225}
-          balance={balance}
-          lastWin={lastWin}
-        />
-
-        {/* Game */}
-        <Reel
-          x={DESIGN_WIDTH / 2 - REEL_WIDTH / 2 + SYMBOL_SIZE / 2}
-          y={DESIGN_HEIGHT / 1.8}
-          symbolSize={SYMBOL_SIZE}
-          gap={GAP}
-          result={result}
-          isSpinning={isSpinning}
-        />
-
-        <SpinButton
-          x={DESIGN_WIDTH / 2}
-          y={DESIGN_HEIGHT - 150}
-          onSpin={spin}
-          disabled={!canSpin}
-          spinCost={spinCost}
-          // 👇 NEW SIGNALS (we'll use these next)
-          isSpinning={isSpinning}
-          canAfford={canAfford}
-        />
       </Container>
     </Stage>
   );

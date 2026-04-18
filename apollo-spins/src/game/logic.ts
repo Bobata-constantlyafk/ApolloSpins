@@ -27,18 +27,16 @@ export function checkWin(result:SpinResult, bet:number):WinResult
       return {
         multiplier: 3,
         payout,
-        message: `Jackpot! Payout: €${payout} 💰`,
+        message: `Jackpot! Payout: ${payout}`,
       };
     } else if (a == b || b == c || c == a) {
       const payout = bet * 2;
       return {
         multiplier: 2,
         payout,
-        message: `Lucky! Payout: € ${payout} 💶`,
+        message: `Lucky! Payout: ${payout}`,
       };
     }
 
     return{multiplier:0, payout:0, message:`Try again 😭😭`}
 }
-
-// export function checkWin(result)

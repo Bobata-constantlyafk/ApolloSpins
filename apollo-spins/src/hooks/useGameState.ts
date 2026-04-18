@@ -14,7 +14,6 @@ export interface GameState {
   balance: number;
   spinCost: number;
   isSpinning: boolean;
-  isStopping: boolean;
   result: SpinResult | null;
   lastWin: WinResult | null;
   canSpin: boolean;
@@ -30,7 +29,6 @@ export function useGameState(): GameState & GameActions {
   const spinCost = SPIN_COST;
 
   const [isSpinning, setIsSpinning] = useState(false);
-  const [isStopping, setIsStopping] = useState(false);
   const [result, setResult] = useState<SpinResult | null>(null);
   const [lastWin, setLastWin] = useState<WinResult | null>(null);
 
@@ -46,7 +44,6 @@ export function useGameState(): GameState & GameActions {
     }
     setLastWin(winResult);
     setIsSpinning(false);
-    setIsStopping(false);
   }, [spinCost]);
 
   const spin = useCallback(() => {
@@ -57,7 +54,6 @@ export function useGameState(): GameState & GameActions {
 
     setBalance((prev) => prev - spinCost);
     setIsSpinning(true);
-    setIsStopping(false);
     setLastWin(null);
     setResult(spinResult);
 
@@ -66,30 +62,17 @@ export function useGameState(): GameState & GameActions {
     }, SPIN_DURATION);
   }, [canSpin, spinCost, resolveWin]);
 
-  // Called when user clicks spin during spinning — skips to result
   const stopSpin = useCallback(() => {
-    if (!isSpinning || isStopping) return;
-
-    if (spinTimeoutRef.current) {
-      clearTimeout(spinTimeoutRef.current);
-      spinTimeoutRef.current = null;
-    }
-
-    setIsStopping(true);
-
-    // Give Reel time to fly symbols off + land result
-    // Reel will call back via onSpinComplete when done — but we resolve
-    // win immediately so balance is ready
-    if (resultRef.current) {
-      setTimeout(() => resolveWin(resultRef.current!), 800);
-    }
-  }, [isSpinning, isStopping, resolveWin]);
+    if (!isSpinning || !resultRef.current) return;
+    clearTimeout(spinTimeoutRef.current!);
+    spinTimeoutRef.current = null;
+    resolveWin(resultRef.current);
+  }, [isSpinning, resolveWin]);
 
   return {
     balance,
     spinCost,
     isSpinning,
-    isStopping,
     result,
     lastWin,
     canSpin,

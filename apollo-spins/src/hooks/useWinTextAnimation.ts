@@ -1,18 +1,23 @@
-// src/hooks/useWinTextAnimation.ts
-
 import { useRef } from "react";
 import { useTick } from "@pixi/react";
 
+const DELAY = 6;
+
 export function useWinTextAnimation(containerRef: any, textRef: any, isWin: boolean) {
-  const timeRef = useRef(0);
+  const timeRef = useRef(-DELAY);
 
   useTick((delta) => {
     timeRef.current += delta * 0.05;
     const t = timeRef.current;
 
-    const BOUNCE_DURATION = 0.4;
+    if (t < 0) {
+      if (containerRef.current) containerRef.current.scale.set(0);
+      return;
+    }
 
+    const BOUNCE_DURATION = 0.4;
     let entryScale: number;
+
     if (t < BOUNCE_DURATION) {
       const p = t / BOUNCE_DURATION;
       entryScale =
@@ -42,7 +47,7 @@ export function useWinTextAnimation(containerRef: any, textRef: any, isWin: bool
 
   return {
     reset: () => {
-      timeRef.current = 0;
+      timeRef.current = -DELAY;
     },
   };
 }
