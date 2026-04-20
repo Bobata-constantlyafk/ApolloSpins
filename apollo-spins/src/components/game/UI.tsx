@@ -16,8 +16,8 @@ interface WinTextProps {
 
 export function WinText({ message, isWin }: WinTextProps) {
   const containerRef = useRef<PixiContainer | null>(null);
-  const textRef      = useRef<PixiText | null>(null);
-  const { reset }    = useWinTextAnimation(containerRef, textRef, isWin);
+  const textRef = useRef<PixiText | null>(null);
+  const { reset } = useWinTextAnimation(containerRef, textRef, isWin);
 
   useEffect(() => {
     reset();
@@ -33,16 +33,30 @@ export function WinText({ message, isWin }: WinTextProps) {
         dropShadowColor: 0xffaa00,
         dropShadowBlur: 12,
       }),
-    [isWin]
+    [isWin],
   );
 
   return (
     <Container ref={containerRef}>
-      <Text ref={textRef} text={message + " "} anchor={0.5} x={0} y={0} style={textStyle} />
-      <Sprite texture={coinTexture} anchor={{ x: 0, y: 0.5 }} x={165} y={-6} width={COIN_SIZE} height={COIN_SIZE} />
+      <Text
+        ref={textRef}
+        text={message + " "}
+        anchor={0.5}
+        x={0}
+        y={0}
+        style={textStyle}
+      />
+      {isWin && (
+        <Sprite
+          texture={coinTexture}
+          anchor={{ x: 0, y: 0.5 }}
+          x={165}
+          y={0}
+          width={COIN_SIZE}
+          height={COIN_SIZE}
+        />
+      )}
     </Container>
-
-    
   );
 }
 
@@ -58,14 +72,33 @@ export function BalanceText({ balance }: BalanceTextProps) {
         fontSize: 13,
         fill: 0xffffff,
       }),
-    []
+    [],
   );
 
   return (
     <Container>
-      <Text text="Balance:" anchor={{ x: 0, y: 0.5 }} x={0} y={0} style={style} />
-      <Text text={`${balance}`} anchor={{ x: 0, y: 0.5 }} x={105} y={0} style={style} />
-      <Sprite texture={coinTexture} anchor={{ x: 0, y: 0.5 }} x={150} y={-3} width={COIN_SIZE - 15} height={COIN_SIZE -15} />
+      <Text
+        text="Balance:"
+        anchor={{ x: 0, y: 0.5 }}
+        x={0}
+        y={0}
+        style={style}
+      />
+      <Text
+        text={`${balance}`}
+        anchor={{ x: 0, y: 0.5 }}
+        x={105}
+        y={0}
+        style={style}
+      />
+      <Sprite
+        texture={coinTexture}
+        anchor={{ x: 0, y: 0.5 }}
+        x={150}
+        y={0}
+        width={COIN_SIZE - 15}
+        height={COIN_SIZE - 15}
+      />
     </Container>
   );
 }

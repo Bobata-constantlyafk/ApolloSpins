@@ -1,5 +1,6 @@
 import { Stage, Container, Sprite } from "@pixi/react";
 import { Texture } from "pixi.js";
+import { useState, useEffect } from "react";
 import { useGameState } from "./hooks/useGameState";
 import { useWindowSize } from "./hooks/useWindowSize";
 import Reel from "./components/game/Reel";
@@ -30,9 +31,16 @@ const BOTTOM_CENTER_Y = BOTTOM_HEIGHT / 2;
 const LICH_SIZE = 240;
 const LICH_Y    = -12;
 
-const lichTexture = Texture.from("/assets/lich.png");
+const lichTexture      = Texture.from("/assets/lich.png");
+const dungeonTexture   = Texture.from("/assets/dungeonBackground.png");
 
 export default function App() {
+  const [fontsReady, setFontsReady] = useState(false);
+
+  useEffect(() => {
+    document.fonts.load('1em "Press Start 2P"').then(() => setFontsReady(true));
+  }, []);
+
   const {
     balance,
     spinCost,
@@ -59,6 +67,8 @@ export default function App() {
   const canAfford = balance >= spinCost;
   const isWin     = lastWin ? lastWin.multiplier > 0 : false;
 
+  if (!fontsReady) return null;
+
   return (
     <Stage
       width={width}
@@ -72,6 +82,7 @@ export default function App() {
         </Container>
 
         <Container x={PANEL_LEFT} y={TOP_HEIGHT}>
+          <Sprite texture={dungeonTexture} x={0} y={0} width={PANEL_WIDTH} height={MIDDLE_HEIGHT} />
           <ReelBorder width={PANEL_WIDTH} height={MIDDLE_HEIGHT} />
           <Reel
             x={REEL_X}
