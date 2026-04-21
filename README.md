@@ -3,7 +3,7 @@
 A graveyard-themed slot machine built with React, TypeScript, and PixiJS.
 
 ## Developer
-- *Boyan Dechev*
+- **Boyan Dechev**
 
 ## Stack
 
