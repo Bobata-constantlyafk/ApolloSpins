@@ -1,7 +1,6 @@
 import { Sprite } from "@pixi/react";
-import { Assets, Texture } from "pixi.js";
-import { useEffect, useState } from "react";
-import { SYMBOL_MAP, type SymbolId } from "../../game/symbols";
+import { type SymbolId } from "../../game/symbols";
+import { symbolTextures } from "../../textures";
 
 interface SymbolProps {
   symbolId: SymbolId;
@@ -10,33 +9,10 @@ interface SymbolProps {
   size?: number;
 }
 
-export default function Symbol({
-  symbolId,
-  x,
-  y,
-  size = 100,
-}: SymbolProps) {
-  const [texture, setTexture] = useState<Texture>(Texture.EMPTY);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const symbol = SYMBOL_MAP[symbolId];
-
-    Assets.load(symbol.asset).then((loadedTexture: Texture) => {
-      if (isMounted) {
-        setTexture(loadedTexture);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [symbolId]);
-
+export default function Symbol({ symbolId, x, y, size = 100 }: SymbolProps) {
   return (
     <Sprite
-      texture={texture}
+      texture={symbolTextures[symbolId]}
       x={x}
       y={y}
       width={size}

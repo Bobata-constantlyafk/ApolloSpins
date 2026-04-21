@@ -1,10 +1,10 @@
 import { Container, Text, Sprite } from "@pixi/react";
-import { Texture, TextMetrics } from "pixi.js";
+import { TextMetrics } from "pixi.js";
 import { useMemo } from "react";
 import type { TextStyle } from "pixi.js";
+import { coinTexture } from "../../textures";
 
-const COIN_GAP    = 4;
-const coinTexture = Texture.from("/assets/skullcoint.png");
+const COIN_GAP = 4;
 
 interface CoinTextProps {
   text: string;

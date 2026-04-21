@@ -8,7 +8,7 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: #1a1a2e; /* match Stage backgroundColor so no flash */
+  background-color: #1a1a2e;
 }
 
 #root {
@@ -18,6 +18,11 @@ html, body {
 
 canvas {
   display: block;
+  cursor: none !important;
+}
+
+* {
+  cursor: none !important;
 }
 
 @font-face {

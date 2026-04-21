@@ -1,12 +1,11 @@
 import { Container, Text, Sprite } from "@pixi/react";
 import { useRef, useEffect, useMemo } from "react";
-import { Texture } from "pixi.js";
 import { TextStyle } from "@pixi/text";
 import { useWinTextAnimation } from "../../hooks/useWinTextAnimation";
 import type { Container as PixiContainer, Text as PixiText } from "pixi.js";
+import { coinTexture } from "../../textures";
 
-const COIN_SIZE   = 45;
-const coinTexture = Texture.from("/assets/skullcoint.png");
+const COIN_SIZE = 45;
 
 
 interface WinTextProps {
@@ -50,7 +49,7 @@ export function WinText({ message, isWin }: WinTextProps) {
         <Sprite
           texture={coinTexture}
           anchor={{ x: 0, y: 0.5 }}
-          x={165}
+          x={180}
           y={0}
           width={COIN_SIZE}
           height={COIN_SIZE}
